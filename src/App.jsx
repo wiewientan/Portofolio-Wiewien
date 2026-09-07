@@ -1534,82 +1534,73 @@ function HeroJapaneseDispersalStage() {
 // ─── Multi-Layered Parallax Cosmic Atmosphere with Japanese Sakura ───────────
 function ParallaxAtmosphere({ mouseX = 0, mouseY = 0, sakuraMode = "breeze" }) {
   const { scrollY } = useScrollInfo();
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   // Pre-calculated star particles
-  const stars = useMemo(() => [
-    { top: "12%", left: "8%", size: 2, char: "✦", color: "#fda4af", speed: 0.12, dur: "4s" },
-    { top: "24%", left: "85%", size: 3, char: "✧", color: "#f43f5e", speed: 0.18, dur: "6s" },
-    { top: "38%", left: "15%", size: 2, char: "✦", color: "#e2e8f0", speed: 0.08, dur: "5s" },
-    { top: "52%", left: "92%", size: 2.5, char: "✦", color: "#d8b4fe", speed: 0.22, dur: "7s" },
-    { top: "68%", left: "6%", size: 3, char: "✧", color: "#fda4af", speed: 0.14, dur: "4.5s" },
-    { top: "78%", left: "80%", size: 2, char: "✧", color: "#f43f5e", speed: 0.25, dur: "5.5s" },
-    { top: "89%", left: "22%", size: 2.5, char: "✦", color: "#fda4af", speed: 0.16, dur: "6.5s" }
-  ], []);
+  const stars = useMemo(() => {
+    const list = [
+      { top: "12%", left: "8%", size: 2, char: "✦", color: "#fda4af", speed: 0.12, dur: "4s" },
+      { top: "24%", left: "85%", size: 3, char: "✧", color: "#f43f5e", speed: 0.18, dur: "6s" },
+      { top: "52%", left: "92%", size: 2.5, char: "✦", color: "#d8b4fe", speed: 0.22, dur: "7s" },
+      { top: "78%", left: "80%", size: 2, char: "✧", color: "#f43f5e", speed: 0.25, dur: "5.5s" }
+    ];
+    return isMobile ? list.slice(0, 2) : [
+      ...list,
+      { top: "38%", left: "15%", size: 2, char: "✦", color: "#e2e8f0", speed: 0.08, dur: "5s" },
+      { top: "68%", left: "6%", size: 3, char: "✧", color: "#fda4af", speed: 0.14, dur: "4.5s" },
+      { top: "89%", left: "22%", size: 2.5, char: "✦", color: "#fda4af", speed: 0.16, dur: "6.5s" }
+    ];
+  }, [isMobile]);
 
   return (
     <div style={{ position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
       {/* Falling Japanese Sakura Blossom Canvas Layer (Rendered BEHIND all content) */}
       <SakuraPetalsCanvas mode={sakuraMode} mouseX={mouseX} mouseY={mouseY} />
 
-      {/* Layer 1: Parallax Deep Cyber Mesh Grid */}
-      <div style={{
-        position:"absolute", inset:0,
-        backgroundImage:`
-          linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)
-        `,
-        backgroundSize:"56px 56px",
-        transform:`translateY(${(scrollY * 0.05) % 56}px)`,
-        maskImage:"radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 95%)",
-        WebkitMaskImage:"radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 95%)",
-        willChange:"transform"
-      }} />
+      {/* Layer 1: Parallax Deep Cyber Mesh Grid (Desktop only or light static) */}
+      {!isMobile && (
+        <div style={{
+          position:"absolute", inset:0,
+          backgroundImage:`
+            linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)
+          `,
+          backgroundSize:"56px 56px",
+          transform:`translateY(${(scrollY * 0.05) % 56}px)`,
+          maskImage:"radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 95%)",
+          WebkitMaskImage:"radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 95%)",
+          willChange:"transform"
+        }} />
+      )}
 
-      {/* Layer 2: Parallax Floating Deep Wine & Crimson Glow Orbs */}
-      <div style={{
-        position:"absolute", width:850, height:850, borderRadius:"50%",
-        background:"radial-gradient(circle, rgba(244, 63, 94, 0.14) 0%, rgba(190, 18, 60, 0.05) 50%, transparent 70%)",
-        left:"10%", top:"12%",
-        transform:`translate(calc(-50% + ${mouseX * 0.02}px), calc(-50% + ${mouseY * 0.02}px + ${-scrollY * 0.12}px))`,
-        filter:"blur(75px)",
-        animation:"ambientPulse 12s ease-in-out infinite",
-        willChange:"transform"
-      }} />
-
-      <div style={{
-        position:"absolute", width:750, height:750, borderRadius:"50%",
-        background:"radial-gradient(circle, rgba(168, 85, 247, 0.09) 0%, rgba(139, 92, 246, 0.03) 50%, transparent 70%)",
-        right:"5%", top:"42%",
-        transform:`translate(calc(50% + ${mouseX * -0.015}px), calc(-50% + ${mouseY * 0.015}px + ${-scrollY * 0.18}px))`,
-        filter:"blur(80px)",
-        animation:"ambientPulse 14s ease-in-out infinite 2s",
-        willChange:"transform"
-      }} />
-
-      <div style={{
-        position:"absolute", width:700, height:700, borderRadius:"50%",
-        background:"radial-gradient(circle, rgba(225, 29, 72, 0.09) 0%, transparent 70%)",
-        left:"50%", bottom:"10%",
-        transform:`translate(calc(-50% + ${mouseX * 0.01}px), calc(50% + ${mouseY * -0.01}px + ${-scrollY * 0.09}px))`,
-        filter:"blur(85px)",
-        willChange:"transform"
-      }} />
-
-      {/* Dynamic Laser Ray Sweep that tilts as you scroll */}
+      {/* Layer 2: Ambient Deep Wine & Crimson Glow Orbs */}
       <div style={{
         position:"absolute",
-        top:"20%",
-        left:"-20%",
-        width:"140%",
-        height:1,
-        background:"linear-gradient(90deg, transparent 0%, rgba(244,63,94,0.18) 50%, transparent 100%)",
-        transform:`rotate(${(-12 + (scrollY * 0.015)) % 360}deg) translateY(${scrollY * 0.15}px)`,
-        filter:"blur(1px)",
-        opacity:0.7,
-        willChange:"transform"
+        width: isMobile ? 320 : 850,
+        height: isMobile ? 320 : 850,
+        borderRadius:"50%",
+        background:"radial-gradient(circle, rgba(244, 63, 94, 0.14) 0%, rgba(190, 18, 60, 0.05) 50%, transparent 70%)",
+        left: isMobile ? "0%" : "10%",
+        top: isMobile ? "5%" : "12%",
+        transform: isMobile ? "none" : `translate(calc(-50% + ${mouseX * 0.02}px), calc(-50% + ${mouseY * 0.02}px + ${-scrollY * 0.12}px))`,
+        filter: isMobile ? "blur(35px)" : "blur(75px)",
+        willChange: isMobile ? "auto" : "transform"
       }} />
 
-      {/* Layer 3: Floating Micro Stardust Particles with Parallax Scroll Offset */}
+      <div style={{
+        position:"absolute",
+        width: isMobile ? 280 : 750,
+        height: isMobile ? 280 : 750,
+        borderRadius:"50%",
+        background:"radial-gradient(circle, rgba(168, 85, 247, 0.09) 0%, rgba(139, 92, 246, 0.03) 50%, transparent 70%)",
+        right: isMobile ? "0%" : "5%",
+        top: isMobile ? "45%" : "42%",
+        transform: isMobile ? "none" : `translate(calc(50% + ${mouseX * -0.015}px), calc(-50% + ${mouseY * 0.015}px + ${-scrollY * 0.18}px))`,
+        filter: isMobile ? "blur(35px)" : "blur(80px)",
+        willChange: isMobile ? "auto" : "transform"
+      }} />
+
+      {/* Layer 3: Floating Micro Stardust Particles */}
       {stars.map((s, idx) => (
         <div
           key={idx}
@@ -1619,11 +1610,9 @@ function ParallaxAtmosphere({ mouseX = 0, mouseY = 0, sakuraMode = "breeze" }) {
             left: s.left,
             fontSize: `${s.size * 5}px`,
             color: s.color,
-            transform:`translateY(${-scrollY * s.speed}px)`,
             opacity: 0.65,
             animation:`starTwinkle ${s.dur} ease-in-out infinite alternate`,
-            textShadow:`0 0 10px ${s.color}`,
-            willChange:"transform"
+            textShadow:`0 0 8px ${s.color}`
           }}
         >
           {s.char}
@@ -1875,17 +1864,32 @@ function InfiniteLoopSlider({ items, renderItem, speed = 0.8, gap = 20, classNam
     }
   }, [velocity]);
 
-  // Duplicated enough times so singleBatchWidth easily covers any screen width with zero gaps
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Duplicated enough times so singleBatchWidth easily covers screen width with zero gaps
   const loopItems = useMemo(() => {
     if (!items || items.length === 0) return [];
     let base = [...items];
-    while (base.length < 12) {
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const targetCount = isMobile ? 6 : 10;
+    while (base.length < targetCount) {
       base = [...base, ...items];
     }
     return [...base, ...base, ...base];
   }, [items]);
 
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting);
+    }, { rootMargin: "150px" });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -1918,7 +1922,7 @@ function InfiniteLoopSlider({ items, renderItem, speed = 0.8, gap = 20, classNam
 
     animFrameId.current = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animFrameId.current);
-  }, [isDragging, speed, items]);
+  }, [isDragging, speed, items, isVisible]);
 
   // Handle natural mousewheel / trackpad horizontal & vertical scroll
   useEffect(() => {
@@ -3708,6 +3712,9 @@ function CuteCatCompanion() {
   }, []);
 
   useEffect(() => {
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    if (isMobile) return;
+
     const onScroll = () => {
       if (isDraggingRef.current || yarnPos) return;
       setCatState("curious");
@@ -4360,7 +4367,7 @@ export default function App() {
 
         /* Responsive Layouts */
         @media (max-width: 900px) {
-          section { padding: 80px 1.25rem 50px !important; }
+          section { padding: 70px 1.25rem 40px !important; }
           .hero-grid { grid-template-columns: 1fr !important; text-align: center !important; gap: 2.5rem !important; }
           .hero-text { display: flex; flex-direction: column; align-items: center; order: 2; }
           .hero-photo { order: 1; margin-bottom: 0.5rem; }
@@ -4368,9 +4375,13 @@ export default function App() {
           .hero-btns button { width: 100%; max-width: 320px; }
           .two-col { grid-template-columns: 1fr !important; gap: 2.5rem !important; }
           .cards-grid { grid-template-columns: 1fr !important; }
+          .glass-card {
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+          }
         }
         @media (max-width: 600px) {
-          .glass-card { padding: 20px 16px !important; }
+          .glass-card { padding: 18px 14px !important; }
         }
       `}</style>
 
