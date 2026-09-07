@@ -375,30 +375,36 @@ function useInView(threshold = 0.15, rootMargin = "0px 0px -60px 0px") {
 function ScrollReveal({
   children,
   delay = 0,
-  y = 40,
-  blur = 16,
-  scale = 0.94,
-  rotateX = 8,
+  y = 30,
+  blur = 12,
+  scale = 0.96,
+  rotateX = 4,
   style = {},
   className = ""
 }) {
-  const [ref, inView] = useInView(0.12, "0px 0px -40px 0px");
+  const [ref, inView] = useInView(0.1, "0px 0px -30px 0px");
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   return (
     <div
       ref={ref}
       className={className}
       style={{
         opacity: inView ? 1 : 0,
-        filter: inView ? "blur(0px)" : `blur(${blur}px)`,
+        filter: isMobile ? "none" : inView ? "blur(0px)" : `blur(${blur}px)`,
         transform: inView
-          ? "perspective(1100px) rotateX(0deg) translateY(0px) scale(1)"
-          : `perspective(1100px) rotateX(${rotateX}deg) translateY(${y}px) scale(${scale})`,
-        transition: `
-          opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms,
-          filter 0.95s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms,
-          transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms
-        `,
-        willChange: "opacity, filter, transform",
+          ? "translate3d(0, 0, 0) scale(1)"
+          : isMobile
+          ? `translate3d(0, ${y}px, 0) scale(${scale})`
+          : `perspective(1000px) rotateX(${rotateX}deg) translate3d(0, ${y}px, 0) scale(${scale})`,
+        transition: isMobile
+          ? `opacity 0.5s ease-out ${delay}ms, transform 0.5s ease-out ${delay}ms`
+          : `
+            opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms,
+            filter 0.85s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms,
+            transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms
+          `,
+        willChange: "opacity, transform",
         ...style
       }}
     >
@@ -512,14 +518,14 @@ function SakuraPetalsCanvas({ mode = "breeze", mouseX = 0, mouseY = 0 }) {
     };
     window.addEventListener("resize", handleResize);
 
-    const isMobile = window.innerWidth < 768;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     
-    // Density & Speed multiplier based on selected mode
+    // Density & Speed multiplier based on selected mode (super lightweight on mobile)
     const configByMode = {
-      calm: { count: isMobile ? 6 : 10, speedMult: 0.35, swayMult: 0.5 },
-      gentle: { count: isMobile ? 12 : 20, speedMult: 0.7, swayMult: 0.8 },
-      breeze: { count: isMobile ? 20 : 36, speedMult: 1.0, swayMult: 1.0 },
-      shower: { count: isMobile ? 32 : 56, speedMult: 1.45, swayMult: 1.35 }
+      calm: { count: isMobile ? 3 : 10, speedMult: 0.35, swayMult: 0.5 },
+      gentle: { count: isMobile ? 5 : 20, speedMult: 0.7, swayMult: 0.8 },
+      breeze: { count: isMobile ? 8 : 32, speedMult: 0.9, swayMult: 0.9 },
+      shower: { count: isMobile ? 12 : 50, speedMult: 1.3, swayMult: 1.2 }
     };
 
     const cfg = configByMode[mode] || configByMode.breeze;
@@ -571,20 +577,20 @@ function SakuraPetalsCanvas({ mode = "breeze", mouseX = 0, mouseY = 0 }) {
         p.rotation += p.rotSpeed * dt;
 
         // Interactive subtle wind push from mouse cursor
-        const dx = p.x - mx;
-        const dy = p.y - my;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        let windX = 0;
-        let windY = 0;
-        if (dist < 140 && dist > 0) {
-          const force = (1 - dist / 140) * 1.5;
-          windX = (dx / dist) * force;
-          windY = (dy / dist) * force;
+        if (!isMobile) {
+          const dx = p.x - mx;
+          const dy = p.y - my;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 140 && dist > 0) {
+            const force = (1 - dist / 140) * 1.5;
+            p.x += (dx / dist) * force * dt;
+            p.y += (dy / dist) * force * dt;
+          }
         }
 
         const sway = Math.sin(p.swayOffset) * (0.65 * p.depth * cfg.swayMult);
-        p.x += (p.speedX * p.depth + sway + windX) * dt;
-        p.y += (p.speedY * p.depth + vBoost * p.depth + windY) * dt;
+        p.x += (p.speedX * p.depth + sway) * dt;
+        p.y += (p.speedY * p.depth + vBoost * p.depth) * dt;
 
         // Wrap boundaries
         if (p.y > height + 30) {
@@ -618,8 +624,10 @@ function SakuraPetalsCanvas({ mode = "breeze", mouseX = 0, mouseY = 0 }) {
         grad.addColorStop(1, p.palette.end);
 
         ctx.fillStyle = grad;
-        ctx.shadowColor = p.palette.glow;
-        ctx.shadowBlur = 8 * p.depth;
+        if (!isMobile) {
+          ctx.shadowColor = p.palette.glow;
+          ctx.shadowBlur = 6 * p.depth;
+        }
         ctx.fill();
 
         ctx.restore();
@@ -4347,9 +4355,12 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f43f5e, #be123c); border-radius: 2px; }
         ::-webkit-scrollbar-track { background: transparent; }
 
+        * { -webkit-tap-highlight-color: transparent; }
+        .glass-card { transform: translateZ(0); -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+
         /* Responsive Layouts */
         @media (max-width: 900px) {
-          section { padding: 90px 1.25rem 60px !important; }
+          section { padding: 80px 1.25rem 50px !important; }
           .hero-grid { grid-template-columns: 1fr !important; text-align: center !important; gap: 2.5rem !important; }
           .hero-text { display: flex; flex-direction: column; align-items: center; order: 2; }
           .hero-photo { order: 1; margin-bottom: 0.5rem; }
@@ -4359,7 +4370,7 @@ export default function App() {
           .cards-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 600px) {
-          .glass-card { padding: 22px 18px !important; }
+          .glass-card { padding: 20px 16px !important; }
         }
       `}</style>
 
